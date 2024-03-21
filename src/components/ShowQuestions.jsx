@@ -1,16 +1,20 @@
-import {useState} from 'react'
+import { useState } from "react";
 
-const ShowQuestions = ({subjects,questions}) => {
-    const [selectedSubject, setSelectedSubject] = useState('All Questions');
+const ShowQuestions = ({ subjects, questions }) => {
+  const [selectedSubject, setSelectedSubject] = useState("All Questions");
 
-    const filteredQuestions = selectedSubject === 'All Questions'
+  const filteredQuestions =
+    selectedSubject === "All Questions"
       ? questions
-      : questions.filter(question => question.subject === selectedSubject);
-  
+      : questions.filter((question) => question.subject === selectedSubject);
+
   return (
-    <section className='px-16 py-6'>
-          <div className="mb-4">
-        <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
+    <section className="px-16 py-6">
+      <div className="mb-4 w-72">
+        <label
+          htmlFor="subject"
+          className="block text-sm font-medium text-gray-700"
+        >
           Select Subject
         </label>
         <select
@@ -28,7 +32,7 @@ const ShowQuestions = ({subjects,questions}) => {
           ))}
         </select>
       </div>
-         <table className="table w-full">
+      <table className="table w-full">
         <thead>
           <tr>
             <th>S No.</th>
@@ -47,19 +51,19 @@ const ShowQuestions = ({subjects,questions}) => {
               <td>{question.subject}</td>
               <td>{question.question}</td>
               <td>{question.difficulty}</td>
-              <td>{question.options.join(', ')}</td>
+              <td>{question.options.join(", ")}</td>
               <td>{question.correctAnswer}</td>
               <td className="text-right">
-                {/* <button onClick={() => handleDelete(index)} className="btn btn-error btn-sm">
+                <button onClick={''} className="btn btn-error btn-sm">
                   Delete
-                </button> */}
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
     </section>
-  )
-}
+  );
+};
 
-export default ShowQuestions
+export default ShowQuestions;
