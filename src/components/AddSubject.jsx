@@ -23,10 +23,10 @@ function AddSubject({ subjects, setSubjects }) {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-semibold mb-4">Add Subjects</h1>
-      <form onSubmit={handleSubmit} className="mb-4 grid grid-cols-4 items-end gap-6">
-        <div className=" ">
+    <div className="px-16 py-6">
+      <h1 className="mb-10 text-3xl font-semibold">Add Subjects</h1>
+      <form onSubmit={handleSubmit} className="grid items-end grid-cols-4 gap-6 mb-4">
+        <div className="">
           <div>
 
           <label
@@ -41,7 +41,7 @@ function AddSubject({ subjects, setSubjects }) {
             name="subject"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
+            className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
             />
             </div>
         </div>
@@ -50,7 +50,7 @@ function AddSubject({ subjects, setSubjects }) {
           Add Subject
         </button>
       </form>
-      <table className="table max-w-3xl  mt-10">
+      <table className="table max-w-3xl mt-10">
         <thead>
           <tr>
             <th>S No.</th>
@@ -66,7 +66,7 @@ function AddSubject({ subjects, setSubjects }) {
               <td className="text-right">
                 <button
                   onClick={() => handleDelete(index)}
-                  className="btn btn-error btn-sm text-white"
+                  className="text-white btn btn-error btn-sm"
                 >
                   Delete
                 </button>
