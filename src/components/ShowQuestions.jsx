@@ -61,6 +61,7 @@ const ShowQuestions = ({ subjects, questions }) => {
       <table className="table w-full">
         <thead>
           <tr>
+            <th></th>
             <th>S No.</th>
             <th>Subject</th>
             <th>Question</th>
@@ -73,6 +74,7 @@ const ShowQuestions = ({ subjects, questions }) => {
         <tbody>
           {filteredQuestions.map((question, index) => (
             <tr key={index}>
+              <td><input type="checkbox"  className="checkbox" /></td>
               <td>{index + 1}</td>
               <td>{question.subject}</td>
               <td>{question.question}</td>
