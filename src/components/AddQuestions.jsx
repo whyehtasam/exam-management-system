@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
 const AddQuestions = ({ subjects,questions,setQuestions }) => {
-  const [selectedSubject, setSelectedSubject] = useState(subjects[0] || '');
+  const [selectedSubject, setSelectedSubject] = useState('Choose subject');
   const [question, setQuestion] = useState('');
-  const [difficulty, setDifficulty] = useState('easy');
+  const [difficulty, setDifficulty] = useState('Choose difficulty');
   const [options, setOptions] = useState(['', '', '', '']);
   const [correctAnswer, setCorrectAnswer] = useState('');
   
@@ -41,6 +41,7 @@ const AddQuestions = ({ subjects,questions,setQuestions }) => {
       onChange={(e) => setSelectedSubject(e.target.value)}
       className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
     >
+      <option value="Choose subject"  disabled>Choose subject</option>
       {subjects.map((subject, index) => (
         <option key={index} value={subject}>
           {subject}
@@ -59,6 +60,7 @@ const AddQuestions = ({ subjects,questions,setQuestions }) => {
       onChange={(e) => setDifficulty(e.target.value)}
       className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
     >
+      <option value="Choose difficulty" disabled>Choose difficulty</option>
       <option value="easy">Easy</option>
       <option value="medium">Medium</option>
       <option value="hard">Hard</option>
