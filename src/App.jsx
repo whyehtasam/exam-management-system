@@ -5,8 +5,10 @@ import Sidebar from "./components/Sidebar";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import AddQuestions from './components/AddQuestions';
 import ShowQuestions from './components/ShowQuestions';
+import PrepareSet from './components/PrepareSet';
 
 function App() {
+  const [totalQuestions,setTotalQuestions] = useState([]);
   const [subjects, setSubjects] = useState(
     JSON.parse(localStorage.getItem('subjects')) || []
   );
@@ -21,6 +23,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('questions', JSON.stringify(questions));
   }, [questions]);
+
+  function getData (data){
+    setTotalQuestions(data);
+  }
   return (
     <Router>
       <div className="flex">
@@ -30,7 +36,8 @@ function App() {
             <Route path="/" element={<AddSubject subjects={subjects} setSubjects={setSubjects} />} />
             <Route path="/showSubjects" element={<ShowSubjects subjects={subjects} />} />
             <Route path="/addQuestions" element={<AddQuestions subjects={subjects} questions={questions} setQuestions={setQuestions}/>} />
-            <Route path="/showQuestions" element={<ShowQuestions questions={questions} setQuestions={setQuestions} subjects={subjects}/>} />
+            <Route path="/showQuestions" element={<ShowQuestions questions={questions} setQuestions={setQuestions} subjects={subjects} getData={getData}/> } />
+            <Route path="/prepareSets" element={<PrepareSet totalQuestions={totalQuestions}/>} />
           </Routes>
          
         </div>

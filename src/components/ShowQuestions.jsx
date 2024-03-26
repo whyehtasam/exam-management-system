@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from "react";
 
-const ShowQuestions = ({ subjects, questions: initialQuestions }) => {
+const ShowQuestions = ({ subjects, questions: initialQuestions,getData }) => {
   // State variables for managing questions, selected subject and difficulty, and current question being edited
   const [questions, setQuestions] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState("All Questions");
@@ -12,15 +12,17 @@ const ShowQuestions = ({ subjects, questions: initialQuestions }) => {
   const [currentQuestion, setCurrentQuestion] = useState(null);
 
   // Effect to load questions from local storage or initial questions when component mounts
-  useEffect(() => {
-    const storedQuestions = localStorage.getItem("questions");
-    if (storedQuestions) {
-      setQuestions(JSON.parse(storedQuestions));
-    } else {
-      setQuestions(initialQuestions);
-    }
-  }, [initialQuestions]);
-
+// Inside ShowQuestions component
+useEffect(() => {
+  const storedQuestions = localStorage.getItem("questions");
+  if (storedQuestions) {
+    setQuestions(JSON.parse(storedQuestions));
+    getData(JSON.parse(storedQuestions)); // call the callback function with the loaded questions
+  } else {
+    setQuestions(initialQuestions);
+    getData(initialQuestions); // call the callback function with the initial questions
+  }
+}, [ ]);
   // Filtering questions based on selected subject and difficulty
   const filteredQuestions = questions.filter((question) => {
     const subjectMatches =
@@ -35,21 +37,21 @@ const ShowQuestions = ({ subjects, questions: initialQuestions }) => {
     setCurrentQuestion({ ...questions[index], index });
   };
 
-  // Function to delete a question
-  const deleteQuestion = (index) => {
-    const newQuestions = questions.filter((_, i) => i !== index);
-    setQuestions(newQuestions);
-    localStorage.setItem("questions", JSON.stringify(newQuestions));
-  };
+  // Inside ShowQuestions component
+const updateQuestion = (updatedQuestion) => {
+  const newQuestions = [...questions];
+  newQuestions[currentQuestion.index] = updatedQuestion;
+  setQuestions(newQuestions);
+  localStorage.setItem('questions', JSON.stringify(newQuestions));
+  getData(newQuestions); // call the callback function with the updated questions
+};
 
-  // Function to update a question
-  const updateQuestion = (updatedQuestion) => {
-    const newQuestions = [...questions];
-    newQuestions[currentQuestion.index] = updatedQuestion;
-    setQuestions(newQuestions);
-    setCurrentQuestion(null);
-    localStorage.setItem("questions", JSON.stringify(newQuestions));
-  };
+const deleteQuestion = (index) => {
+  const newQuestions = questions.filter((_, i) => i !== index);
+  setQuestions(newQuestions);
+  localStorage.setItem('questions', JSON.stringify(newQuestions));
+  getData(newQuestions); // call the callback function with the updated questions
+};
 
   // Function to handle form submission when editing a question
   const handleFormSubmit = (e) => {
@@ -68,7 +70,7 @@ const ShowQuestions = ({ subjects, questions: initialQuestions }) => {
     document.getElementById("my_modal_1").close();
   };
 
-
+console.log('filter:',filteredQuestions);
   return (
     <section className="px-16 py-6">
       <div className="flex gap-6">
