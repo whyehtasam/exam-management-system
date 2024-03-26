@@ -1,12 +1,9 @@
 import { useState } from "react";
 
-
 const PrepareSet = ({ subjects, questions }) => {
-  
   const [selectedSubject, setSelectedSubject] = useState("All Questions");
-  const [selectedDifficulty, setSelectedDifficulty] =
-    useState("Choose difficulty");
- 
+  const [selectedDifficulty, setSelectedDifficulty] = useState("Choose difficulty");
+
   const filteredQuestions = questions.filter((question) => {
     const subjectMatches =
       selectedSubject === "All Questions" ||
@@ -16,7 +13,7 @@ const PrepareSet = ({ subjects, questions }) => {
       question.difficulty === selectedDifficulty;
     return subjectMatches && difficultyMatches;
   });
-  
+
   return (
     <div className="px-16 py-6">
       <div className="flex gap-6">
@@ -66,6 +63,7 @@ const PrepareSet = ({ subjects, questions }) => {
       <table className="table w-full">
         <thead>
           <tr>
+            <th></th>
             <th>S No.</th>
             <th>Subject</th>
             <th>Question</th>
@@ -77,6 +75,7 @@ const PrepareSet = ({ subjects, questions }) => {
         <tbody>
           {filteredQuestions.map((question, index) => (
             <tr key={index}>
+              <td><input type="checkbox"  className="checkbox" /></td>
               <td>{index + 1}</td>
               <td>{question.subject}</td>
               <td>{question.question}</td>
