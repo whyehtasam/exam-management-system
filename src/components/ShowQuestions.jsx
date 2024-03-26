@@ -1,41 +1,57 @@
+// This React component, ShowQuestions, is responsible for displaying a table of questions, filtered by subject and difficulty level. 
+// It includes functionalities to edit, delete, and update questions. 
+// It utilizes local storage to persist question data between sessions.
+
 import { useState, useEffect } from "react";
 
 const ShowQuestions = ({ subjects, questions: initialQuestions }) => {
+  // State variables for managing questions, selected subject and difficulty, and current question being edited
   const [questions, setQuestions] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState("All Questions");
-  const [selectedDifficulty, setSelectedDifficulty] =
-    useState("Choose difficulty");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("Choose difficulty");
   const [currentQuestion, setCurrentQuestion] = useState(null);
 
+  // Effect to load questions from local storage or initial questions when component mounts
   useEffect(() => {
-    setQuestions(initialQuestions);
+    const storedQuestions = localStorage.getItem("questions");
+    if (storedQuestions) {
+      setQuestions(JSON.parse(storedQuestions));
+    } else {
+      setQuestions(initialQuestions);
+    }
   }, [initialQuestions]);
 
+  // Filtering questions based on selected subject and difficulty
   const filteredQuestions = questions.filter((question) => {
     const subjectMatches =
-      selectedSubject === "All Questions" ||
-      question.subject === selectedSubject;
+      selectedSubject === "All Questions" || question.subject === selectedSubject;
     const difficultyMatches =
-      selectedDifficulty === "Choose difficulty" ||
-      question.difficulty === selectedDifficulty;
+      selectedDifficulty === "Choose difficulty" || question.difficulty === selectedDifficulty;
     return subjectMatches && difficultyMatches;
   });
 
+  // Function to edit a question
   const editQuestion = (index) => {
     setCurrentQuestion({ ...questions[index], index });
   };
 
+  // Function to delete a question
   const deleteQuestion = (index) => {
-    setQuestions(questions.filter((_, i) => i !== index));
+    const newQuestions = questions.filter((_, i) => i !== index);
+    setQuestions(newQuestions);
+    localStorage.setItem("questions", JSON.stringify(newQuestions));
   };
 
+  // Function to update a question
   const updateQuestion = (updatedQuestion) => {
     const newQuestions = [...questions];
     newQuestions[currentQuestion.index] = updatedQuestion;
     setQuestions(newQuestions);
     setCurrentQuestion(null);
+    localStorage.setItem("questions", JSON.stringify(newQuestions));
   };
 
+  // Function to handle form submission when editing a question
   const handleFormSubmit = (e) => {
     e.preventDefault();
     const updatedQuestion = {
@@ -51,6 +67,8 @@ const ShowQuestions = ({ subjects, questions: initialQuestions }) => {
     e.target.reset();
     document.getElementById("my_modal_1").close();
   };
+
+
   return (
     <section className="px-16 py-6">
       <div className="flex gap-6">
@@ -66,7 +84,7 @@ const ShowQuestions = ({ subjects, questions: initialQuestions }) => {
             name="subject"
             value={selectedSubject}
             onChange={(e) => setSelectedSubject(e.target.value)}
-            className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
+            className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
           >
             <option value="All Questions">All Questions</option>
             {subjects.map((subject, index) => (
@@ -88,7 +106,7 @@ const ShowQuestions = ({ subjects, questions: initialQuestions }) => {
             name="difficulty"
             value={selectedDifficulty}
             onChange={(e) => setSelectedDifficulty(e.target.value)}
-            className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
+            className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
           >
             <option value="Choose difficulty">All Difficulty</option>
             <option value="easy">Easy</option>
@@ -124,7 +142,7 @@ const ShowQuestions = ({ subjects, questions: initialQuestions }) => {
                 </ul>
               </td>
               <td>{question.correctAnswer}</td>
-              <td className=" flex gap-6">
+              <td className="flex gap-6 ">
                 <button
                   className="btn btn-sm"
                   onClick={() => {
@@ -136,14 +154,14 @@ const ShowQuestions = ({ subjects, questions: initialQuestions }) => {
                 </button>
                 <dialog id="my_modal_1" className="modal">
                   <div className="modal-box">
-                    <h3 className="font-bold text-lg">
+                    <h3 className="text-lg font-bold">
                       Edit the Question below
                     </h3>
 
                     <div className="modal-action">
                       <form
                         onSubmit={handleFormSubmit}
-                        className="grid grid-cols-2 gap-6 mb-4  w-full"
+                        className="grid w-full grid-cols-2 gap-6 mb-4"
                         method="dialog"
                       >
                         <div className="mb-4">
@@ -269,10 +287,13 @@ const ShowQuestions = ({ subjects, questions: initialQuestions }) => {
                             />
                           </div>
                         ))}
-                        <button type="submit" className="btn btn-success btn-sm" >
+                        <button
+                          type="submit"
+                          className="btn btn-success "
+                        >
                           Save
                         </button>
-                        <button className="btn btn-neutral btn-sm">
+                        <button className="btn btn-neutral ">
                           Close
                         </button>
                       </form>
