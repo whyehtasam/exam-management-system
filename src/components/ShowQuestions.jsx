@@ -1,57 +1,62 @@
-// This React component, ShowQuestions, is responsible for displaying a table of questions, filtered by subject and difficulty level. 
-// It includes functionalities to edit, delete, and update questions. 
+// This React component, ShowQuestions, is responsible for displaying a table of questions, filtered by subject and difficulty level.
+// It includes functionalities to edit, delete, and update questions.
 // It utilizes local storage to persist question data between sessions.
 
 import { useState, useEffect } from "react";
 
-const ShowQuestions = ({ subjects, questions: initialQuestions,getData }) => {
+const ShowQuestions = ({ subjects, questions: initialQuestions, getData }) => {
   // State variables for managing questions, selected subject and difficulty, and current question being edited
   const [questions, setQuestions] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState("All Questions");
-  const [selectedDifficulty, setSelectedDifficulty] = useState("Choose difficulty");
+  const [selectedDifficulty, setSelectedDifficulty] =
+    useState("Choose difficulty");
+  const [formData, setFormData] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(null);
-
+  const [originalData, setOriginalData] = useState(null);
   // Effect to load questions from local storage or initial questions when component mounts
-// Inside ShowQuestions component
-useEffect(() => {
-  const storedQuestions = localStorage.getItem("questions");
-  if (storedQuestions) {
-    setQuestions(JSON.parse(storedQuestions));
-    getData(JSON.parse(storedQuestions)); // call the callback function with the loaded questions
-  } else {
-    setQuestions(initialQuestions);
-    getData(initialQuestions); // call the callback function with the initial questions
-  }
-}, [ ]);
+  // Inside ShowQuestions component
+  useEffect(() => {
+    const storedQuestions = localStorage.getItem("questions");
+    if (storedQuestions) {
+      setQuestions(JSON.parse(storedQuestions));
+      getData(JSON.parse(storedQuestions)); // call the callback function with the loaded questions
+    } else {
+      setQuestions(initialQuestions);
+      getData(initialQuestions); // call the callback function with the initial questions
+    }
+  }, []);
   // Filtering questions based on selected subject and difficulty
   const filteredQuestions = questions.filter((question) => {
     const subjectMatches =
-      selectedSubject === "All Questions" || question.subject === selectedSubject;
+      selectedSubject === "All Questions" ||
+      question.subject === selectedSubject;
     const difficultyMatches =
-      selectedDifficulty === "Choose difficulty" || question.difficulty === selectedDifficulty;
+      selectedDifficulty === "Choose difficulty" ||
+      question.difficulty === selectedDifficulty;
     return subjectMatches && difficultyMatches;
   });
 
   // Function to edit a question
   const editQuestion = (index) => {
     setCurrentQuestion({ ...questions[index], index });
+    setFormData(questions[index]); // Set the form data to the current question
+    setOriginalData(questions[index]);
+  };
+  // Inside ShowQuestions component
+  const updateQuestion = (updatedQuestion) => {
+    const newQuestions = [...questions];
+    newQuestions[currentQuestion.index] = updatedQuestion;
+    setQuestions(newQuestions);
+    localStorage.setItem("questions", JSON.stringify(newQuestions));
+    getData(newQuestions); // call the callback function with the updated questions
   };
 
-  // Inside ShowQuestions component
-const updateQuestion = (updatedQuestion) => {
-  const newQuestions = [...questions];
-  newQuestions[currentQuestion.index] = updatedQuestion;
-  setQuestions(newQuestions);
-  localStorage.setItem('questions', JSON.stringify(newQuestions));
-  getData(newQuestions); // call the callback function with the updated questions
-};
-
-const deleteQuestion = (index) => {
-  const newQuestions = questions.filter((_, i) => i !== index);
-  setQuestions(newQuestions);
-  localStorage.setItem('questions', JSON.stringify(newQuestions));
-  getData(newQuestions); // call the callback function with the updated questions
-};
+  const deleteQuestion = (index) => {
+    const newQuestions = questions.filter((_, i) => i !== index);
+    setQuestions(newQuestions);
+    localStorage.setItem("questions", JSON.stringify(newQuestions));
+    getData(newQuestions); // call the callback function with the updated questions
+  };
 
   // Function to handle form submission when editing a question
   const handleFormSubmit = (e) => {
@@ -68,9 +73,10 @@ const deleteQuestion = (index) => {
     updateQuestion(updatedQuestion);
     e.target.reset();
     document.getElementById("my_modal_1").close();
+    setFormData(null); // Reset the form data after submission
   };
 
-console.log('filter:',filteredQuestions);
+  console.log("filter:", filteredQuestions);
   return (
     <section className="px-16 py-6">
       <div className="flex gap-6">
@@ -176,10 +182,10 @@ console.log('filter:',filteredQuestions);
                           <select
                             id="subject"
                             name="subject"
-                            value={currentQuestion?.subject || ""}
+                            value={formData?.subject || ""}
                             onChange={(e) =>
-                              setCurrentQuestion({
-                                ...currentQuestion,
+                              setFormData({
+                                ...formData,
                                 subject: e.target.value,
                               })
                             }
@@ -205,10 +211,10 @@ console.log('filter:',filteredQuestions);
                           <select
                             id="difficulty"
                             name="difficulty"
-                            value={currentQuestion?.difficulty || ""}
+                            value={formData?.difficulty || ""}
                             onChange={(e) =>
-                              setCurrentQuestion({
-                                ...currentQuestion,
+                              setFormData({
+                                ...formData,
                                 difficulty: e.target.value,
                               })
                             }
@@ -217,9 +223,9 @@ console.log('filter:',filteredQuestions);
                             <option value="Choose difficulty" disabled>
                               Choose difficulty
                             </option>
-                            <option value="Easy">Easy</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Hard">Hard</option>
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
                           </select>
                         </div>
                         <div className="mb-4">
@@ -233,10 +239,10 @@ console.log('filter:',filteredQuestions);
                             type="text"
                             id="question"
                             name="question"
-                            value={currentQuestion?.question || ""}
+                            value={formData?.question || ""}
                             onChange={(e) =>
-                              setCurrentQuestion({
-                                ...currentQuestion,
+                              setFormData({
+                                ...formData,
                                 question: e.target.value,
                               })
                             }
@@ -254,17 +260,17 @@ console.log('filter:',filteredQuestions);
                             type="text"
                             id="correctAnswer"
                             name="correctAnswer"
-                            value={currentQuestion?.correctAnswer || ""}
+                            value={formData?.correctAnswer || ""}
                             onChange={(e) =>
-                              setCurrentQuestion({
-                                ...currentQuestion,
+                              setFormData({
+                                ...formData,
                                 correctAnswer: e.target.value,
                               })
                             }
                             className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
                           />
                         </div>
-                        {currentQuestion?.options.map((option, index) => (
+                        {formData?.options.map((option, index) => (
                           <div key={index} className="mb-4">
                             <label
                               htmlFor={`option${index}`}
@@ -278,10 +284,10 @@ console.log('filter:',filteredQuestions);
                               name={`option${index}`}
                               value={option}
                               onChange={(e) => {
-                                const newOptions = [...currentQuestion.options];
+                                const newOptions = [...formData.options];
                                 newOptions[index] = e.target.value;
-                                setCurrentQuestion({
-                                  ...currentQuestion,
+                                setFormData({
+                                  ...formData,
                                   options: newOptions,
                                 });
                               }}
@@ -289,14 +295,17 @@ console.log('filter:',filteredQuestions);
                             />
                           </div>
                         ))}
-                        <button
-                          type="submit"
-                          className="btn btn-success "
-                        >
+                        <button type="submit" className="btn btn-success ">
                           Save
                         </button>
-                        <button className="btn btn-neutral ">
-                          Close
+                        <button
+                          className="btn btn-neutral "
+                          onClick={() => {
+                            document.getElementById("my_modal_1").close();
+                            setFormData(originalData);
+                          }}
+                        >
+                          Cancle
                         </button>
                       </form>
                     </div>

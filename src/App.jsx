@@ -36,8 +36,10 @@ function App() {
             <Route path="/" element={<AddSubject subjects={subjects} setSubjects={setSubjects} />} />
             <Route path="/showSubjects" element={<ShowSubjects subjects={subjects} />} />
             <Route path="/addQuestions" element={<AddQuestions subjects={subjects} questions={questions} setQuestions={setQuestions}/>} />
+
             <Route path="/showQuestions" element={<ShowQuestions questions={questions} setQuestions={setQuestions} subjects={subjects} getData={getData}/> } />
-            <Route path="/prepareSets" element={<PrepareSet totalQuestions={totalQuestions}/>} />
+
+            <Route path="/prepareSets" element={<PrepareSet questions={totalQuestions}  subjects={subjects}  />} />
           </Routes>
          
         </div>
