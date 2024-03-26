@@ -1,17 +1,56 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const ShowQuestions = ({ subjects, questions }) => {
+const ShowQuestions = ({ subjects, questions: initialQuestions }) => {
+  const [questions, setQuestions] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState("All Questions");
   const [selectedDifficulty, setSelectedDifficulty] =
     useState("Choose difficulty");
+  const [currentQuestion, setCurrentQuestion] = useState(null);
 
-    const filteredQuestions = questions.filter(question => {
-      const subjectMatches = selectedSubject === "All Questions" || question.subject === selectedSubject;
-      const difficultyMatches = selectedDifficulty === "Choose difficulty" || question.difficulty === selectedDifficulty;
-      return subjectMatches && difficultyMatches;
-    });
-    console.log(filteredQuestions);
+  useEffect(() => {
+    setQuestions(initialQuestions);
+  }, [initialQuestions]);
 
+  const filteredQuestions = questions.filter((question) => {
+    const subjectMatches =
+      selectedSubject === "All Questions" ||
+      question.subject === selectedSubject;
+    const difficultyMatches =
+      selectedDifficulty === "Choose difficulty" ||
+      question.difficulty === selectedDifficulty;
+    return subjectMatches && difficultyMatches;
+  });
+
+  const editQuestion = (index) => {
+    setCurrentQuestion({ ...questions[index], index });
+  };
+
+  const deleteQuestion = (index) => {
+    setQuestions(questions.filter((_, i) => i !== index));
+  };
+
+  const updateQuestion = (updatedQuestion) => {
+    const newQuestions = [...questions];
+    newQuestions[currentQuestion.index] = updatedQuestion;
+    setQuestions(newQuestions);
+    setCurrentQuestion(null);
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    const updatedQuestion = {
+      subject: e.target.subject.value,
+      difficulty: e.target.difficulty.value,
+      question: e.target.question.value,
+      correctAnswer: e.target.correctAnswer.value,
+      options: Array.from(e.target.elements)
+        .filter((element) => element.name.startsWith("option"))
+        .map((element) => element.value),
+    };
+    updateQuestion(updatedQuestion);
+    e.target.reset();
+    document.getElementById("my_modal_1").close();
+  };
   return (
     <section className="px-16 py-6">
       <div className="flex gap-6">
@@ -61,20 +100,18 @@ const ShowQuestions = ({ subjects, questions }) => {
       <table className="table w-full">
         <thead>
           <tr>
-            <th></th>
             <th>S No.</th>
             <th>Subject</th>
             <th>Question</th>
             <th>Difficulty</th>
             <th>Options</th>
             <th>Correct Answer</th>
-            <th className="text-right">Actions</th>
+            <th className="">Actions</th>
           </tr>
         </thead>
         <tbody>
           {filteredQuestions.map((question, index) => (
             <tr key={index}>
-              <td><input type="checkbox"  className="checkbox" /></td>
               <td>{index + 1}</td>
               <td>{question.subject}</td>
               <td>{question.question}</td>
@@ -87,8 +124,165 @@ const ShowQuestions = ({ subjects, questions }) => {
                 </ul>
               </td>
               <td>{question.correctAnswer}</td>
-              <td className="text-right">
-                <button onClick={""} className="btn btn-error btn-sm">
+              <td className=" flex gap-6">
+                <button
+                  className="btn btn-sm"
+                  onClick={() => {
+                    editQuestion(index);
+                    document.getElementById("my_modal_1").showModal();
+                  }}
+                >
+                  Edit
+                </button>
+                <dialog id="my_modal_1" className="modal">
+                  <div className="modal-box">
+                    <h3 className="font-bold text-lg">
+                      Edit the Question below
+                    </h3>
+
+                    <div className="modal-action">
+                      <form
+                        onSubmit={handleFormSubmit}
+                        className="grid grid-cols-2 gap-6 mb-4  w-full"
+                        method="dialog"
+                      >
+                        <div className="mb-4">
+                          <label
+                            htmlFor="subject"
+                            className="block text-sm font-medium text-gray-700"
+                          >
+                            Subject
+                          </label>
+                          <select
+                            id="subject"
+                            name="subject"
+                            value={currentQuestion?.subject || ""}
+                            onChange={(e) =>
+                              setCurrentQuestion({
+                                ...currentQuestion,
+                                subject: e.target.value,
+                              })
+                            }
+                            className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+                          >
+                            <option value="Choose subject" disabled>
+                              Choose subject
+                            </option>
+                            {subjects.map((subject, index) => (
+                              <option key={index} value={subject}>
+                                {subject}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="mb-4">
+                          <label
+                            htmlFor="difficulty"
+                            className="block text-sm font-medium text-gray-700"
+                          >
+                            Difficulty
+                          </label>
+                          <select
+                            id="difficulty"
+                            name="difficulty"
+                            value={currentQuestion?.difficulty || ""}
+                            onChange={(e) =>
+                              setCurrentQuestion({
+                                ...currentQuestion,
+                                difficulty: e.target.value,
+                              })
+                            }
+                            className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+                          >
+                            <option value="Choose difficulty" disabled>
+                              Choose difficulty
+                            </option>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                          </select>
+                        </div>
+                        <div className="mb-4">
+                          <label
+                            htmlFor="question"
+                            className="block text-sm font-medium text-gray-700"
+                          >
+                            Question
+                          </label>
+                          <input
+                            type="text"
+                            id="question"
+                            name="question"
+                            value={currentQuestion?.question || ""}
+                            onChange={(e) =>
+                              setCurrentQuestion({
+                                ...currentQuestion,
+                                question: e.target.value,
+                              })
+                            }
+                            className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                        <div className="mb-4">
+                          <label
+                            htmlFor="correctAnswer"
+                            className="block text-sm font-medium text-gray-700"
+                          >
+                            Correct Answer
+                          </label>
+                          <input
+                            type="text"
+                            id="correctAnswer"
+                            name="correctAnswer"
+                            value={currentQuestion?.correctAnswer || ""}
+                            onChange={(e) =>
+                              setCurrentQuestion({
+                                ...currentQuestion,
+                                correctAnswer: e.target.value,
+                              })
+                            }
+                            className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                        {currentQuestion?.options.map((option, index) => (
+                          <div key={index} className="mb-4">
+                            <label
+                              htmlFor={`option${index}`}
+                              className="block text-sm font-medium text-gray-700"
+                            >
+                              Option {index + 1}
+                            </label>
+                            <input
+                              type="text"
+                              id={`option${index}`}
+                              name={`option${index}`}
+                              value={option}
+                              onChange={(e) => {
+                                const newOptions = [...currentQuestion.options];
+                                newOptions[index] = e.target.value;
+                                setCurrentQuestion({
+                                  ...currentQuestion,
+                                  options: newOptions,
+                                });
+                              }}
+                              className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+                            />
+                          </div>
+                        ))}
+                        <button type="submit" className="btn btn-success btn-sm" >
+                          Save
+                        </button>
+                        <button className="btn btn-neutral btn-sm">
+                          Close
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </dialog>
+                <button
+                  onClick={() => deleteQuestion(index)}
+                  className="btn btn-error btn-sm"
+                >
                   Delete
                 </button>
               </td>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 const Sidebar = () => {
-  const [isActive, setIsActive] = useState(1);
+  const [isActive, setIsActive] = useState(0);
   const links = [
     { path: "/", label: "Add Subjects" },
     { path: "/showSubjects", label: "Show Subjects" },
@@ -31,8 +31,14 @@ const Sidebar = () => {
           {/* Sidebar content here */}
           {links.map((link, index) => (
             <Link key={index} to={link.path}>
-              <button className={`w-full btn btn-lg ${isActive === index ? "btn-neutral" : "bg-base-100"}`}
-                onClick={() => {setIsActive(index);}}>
+              <button
+                className={`w-full btn btn-lg ${
+                  isActive === index ? "btn-neutral" : "bg-base-100"
+                }`}
+                onClick={() => {
+                  setIsActive(index);
+                }}
+              >
                 {link.label}
               </button>
             </Link>
