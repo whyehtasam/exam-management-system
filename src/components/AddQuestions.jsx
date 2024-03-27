@@ -18,11 +18,7 @@ const AddQuestions = ({ subjects,questions,setQuestions }) => {
     }
   };
 
-  const handleDelete = (index) => {
-    const newQuestions = [...questions];
-    newQuestions.splice(index, 1);
-    setQuestions(newQuestions);
-  };
+ 
 
   console.log(questions);
   return (
