@@ -2,25 +2,80 @@ import React, { useState, useEffect } from "react";
 
 function AddSubject({ subjects, setSubjects }) {
   const [subject, setSubject] = useState("");
+  const [data, setData] = useState([]);
 
-
-  useEffect(() => {
-    localStorage.setItem("subjects", JSON.stringify(subjects));
-  }, [subjects]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (subject !== "") {
-      setSubjects([...subjects, subject]);
-      setSubject("");
+  // Fetching data from the server
+  const fetchData = async () => {
+    try {
+      const response = await fetch("http://api.ahthitsolutions.com/v1/get_all_subjects", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      setData(data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
     }
   };
 
-  const handleDelete = (index) => {
-    const newSubjects = [...subjects];
-    newSubjects.splice(index, 1);
-    setSubjects(newSubjects);
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (subject !== "") {
+      const newSubject = [{ subject: subject }];
+
+      try {
+        const response = await fetch("http://api.ahthitsolutions.com/v1/store_subjects", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newSubject),
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
+        }
+
+        setSubjects([...subjects, newSubject[0]]);
+        setSubject("");
+        fetchData();
+      } catch (error) {
+        console.error("Error posting data:", error);
+      }
+    }
   };
+
+  // Handle deletion of a subject
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`http://api.ahthitsolutions.com/v1/delete_subject?id=${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
+      }
+
+      // Update local state after deletion
+      const updatedSubjects = subjects.filter((subj) => subj.id !== id);
+      setSubjects(updatedSubjects);
+      fetchData(); // Fetch updated data
+    } catch (error) {
+      console.error("Error deleting subject:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <div className="px-16 py-6">
@@ -28,24 +83,20 @@ function AddSubject({ subjects, setSubjects }) {
       <form onSubmit={handleSubmit} className="grid items-end grid-cols-4 gap-6 mb-4">
         <div className="">
           <div>
-
-          <label
-            htmlFor="subject"
-            className="block text-base font-medium text-gray-700"
-            >
-            Subject
-          </label>
-          <input
-            type="text"
-            id="subject"
-            name="subject"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+            <label htmlFor="subject" className="block text-base font-medium text-gray-700">
+              Subject
+            </label>
+            <input
+              type="text"
+              id="subject"
+              name="subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
             />
-            </div>
+          </div>
         </div>
-        
+
         <button type="submit" className="btn w-fit btn-primary">
           Add Subject
         </button>
@@ -59,13 +110,13 @@ function AddSubject({ subjects, setSubjects }) {
           </tr>
         </thead>
         <tbody>
-          {subjects.map((subject, index) => (
+          {data.map((subj, index) => (
             <tr key={index} className="hover:bg-slate-50">
               <td>{index + 1}</td>
-              <td>{subject}</td>
+              <td>{subj.subject_name}</td>
               <td className="text-right">
                 <button
-                  onClick={() => handleDelete(index)}
+                  onClick={() => handleDelete(subj.id)} // Pass subject ID to handleDelete
                   className="text-white btn btn-error btn-sm"
                 >
                   Delete
