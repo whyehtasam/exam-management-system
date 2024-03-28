@@ -1,25 +1,28 @@
-import {useState,useEffect} from "react";
+import {useEffect} from "react";
 
-const ShowSubjects = () => {
+const ShowSubjects = ({data,fetchData}) => {
 
-  const [data, setData] = useState([]);
+  // const [data, setData] = useState([]);
   // Fetching data from the server
-  const fetchData = async () => {
-    try {
-      const response = await fetch("http://api.ahthitsolutions.com/v1/get_all_subjects", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
-      setData(data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+  // const fetchData = async () => {
+  //   try {
+  //     const response = await fetch("http://api.ahthitsolutions.com/v1/get_all_subjects", {
+  //       method: "GET",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+  //     const data = await response.json();
+  //     setData(data);
+  //     setFetchSubjects(data);
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   }
+  // };
   useEffect(() => {
     fetchData();
+    console.log("Fetching data",data);
+    
   }, []);
 
 

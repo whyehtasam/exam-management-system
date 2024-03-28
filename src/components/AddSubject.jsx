@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from "react";
 
-function AddSubject({ subjects, setSubjects }) {
+function AddSubject({ subjects, setSubjects,data,fetchData }) {
   const [subject, setSubject] = useState("");
-  const [data, setData] = useState([]);
 
-  // Fetching data from the server
-  const fetchData = async () => {
-    try {
-      const response = await fetch("http://api.ahthitsolutions.com/v1/get_all_subjects", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
-      setData(data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+
+  // // Fetching data from the server
+  // const fetchData = async () => {
+  //   try {
+  //     const response = await fetch("http://api.ahthitsolutions.com/v1/get_all_subjects", {
+  //       method: "GET",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+  //     const data = await response.json();
+  //     setData(data);
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   }
+  // };
 
   // Handle form submission
   const handleSubmit = async (e) => {
@@ -39,6 +39,7 @@ function AddSubject({ subjects, setSubjects }) {
           const text = await response.text();
           throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
         }
+     
 
         setSubjects([...subjects, newSubject[0]]);
         setSubject("");
