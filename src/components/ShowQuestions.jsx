@@ -1,71 +1,61 @@
-// This React component, ShowQuestions, is responsible for displaying a table of questions, filtered by subject and difficulty level.
-// It includes functionalities to edit, delete, and update questions.
-// It utilizes local storage to persist question data between sessions.
+import React, { useState, useEffect } from "react";
 
-import { useState, useEffect } from "react";
-
-const ShowQuestions = ({ subjects, questions: initialQuestions, getData }) => {
-  // State variables for managing questions, selected subject and difficulty, and current question being edited
+const ShowQuestions = ({ subjects, fetchQues }) => {
   const [questions, setQuestions] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState("All Questions");
-  const [selectedDifficulty, setSelectedDifficulty] =
-    useState("Choose difficulty");
+  const [selectedDifficulty, setSelectedDifficulty] = useState(
+    "Choose difficulty"
+  );
   const [formData, setFormData] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [originalData, setOriginalData] = useState(null);
-  // Effect to load questions from local storage or initial questions when component mounts
-  // Inside ShowQuestions component
+
   useEffect(() => {
-    const storedQuestions = localStorage.getItem("questions");
-    if (storedQuestions) {
-      setQuestions(JSON.parse(storedQuestions));
-      getData(JSON.parse(storedQuestions)); // call the callback function with the loaded questions
-    } else {
-      setQuestions(initialQuestions);
-      getData(initialQuestions); // call the callback function with the initial questions
-    }
-  }, []);
-  // Filtering questions based on selected subject and difficulty
+    setQuestions(fetchQues);
+  }, [fetchQues]);
+
   const filteredQuestions = questions.filter((question) => {
     const subjectMatches =
       selectedSubject === "All Questions" ||
-      question.subject === selectedSubject;
+      question.subject_name === selectedSubject;
     const difficultyMatches =
       selectedDifficulty === "Choose difficulty" ||
-      question.difficulty === selectedDifficulty;
+      question.question_level === selectedDifficulty;
     return subjectMatches && difficultyMatches;
   });
 
-  // Function to edit a question
-  const editQuestion = (index) => {
-    setCurrentQuestion({ ...questions[index], index });
-    setFormData(questions[index]); // Set the form data to the current question
-    setOriginalData(questions[index]);
+  const editQuestion = (id) => {
+    const index = questions.findIndex((question) => question.id === id);
+    if (index !== -1) {
+      setCurrentQuestion({ ...questions[index], index });
+      setFormData(questions[index]);
+      setOriginalData(questions[index]);
+      document.getElementById("my_modal_1").showModal();
+    }
   };
-  // Inside ShowQuestions component
+
   const updateQuestion = (updatedQuestion) => {
-    const newQuestions = [...questions];
-    newQuestions[currentQuestion.index] = updatedQuestion;
+    const newQuestions = questions.map((question) =>
+      question.id === updatedQuestion.id ? updatedQuestion : question
+    );
     setQuestions(newQuestions);
-    localStorage.setItem("questions", JSON.stringify(newQuestions));
-    getData(newQuestions); // call the callback function with the updated questions
+    // Call any necessary callback function here
   };
 
-  const deleteQuestion = (index) => {
-    const newQuestions = questions.filter((_, i) => i !== index);
+  const deleteQuestion = (id) => {
+    const newQuestions = questions.filter((question) => question.id !== id);
     setQuestions(newQuestions);
-    localStorage.setItem("questions", JSON.stringify(newQuestions));
-    getData(newQuestions); // call the callback function with the updated questions
+    // Call any necessary callback function here
   };
 
-  // Function to handle form submission when editing a question
   const handleFormSubmit = (e) => {
     e.preventDefault();
     const updatedQuestion = {
-      subject: e.target.subject.value,
-      difficulty: e.target.difficulty.value,
+      id: formData.id,
+      subject_name: e.target.subject.value,
+      question_level: e.target.difficulty.value,
       question: e.target.question.value,
-      correctAnswer: e.target.correctAnswer.value,
+      correct_answer: e.target.correctAnswer.value,
       options: Array.from(e.target.elements)
         .filter((element) => element.name.startsWith("option"))
         .map((element) => element.value),
@@ -73,15 +63,14 @@ const ShowQuestions = ({ subjects, questions: initialQuestions, getData }) => {
     updateQuestion(updatedQuestion);
     e.target.reset();
     document.getElementById("my_modal_1").close();
-    setFormData(null); // Reset the form data after submission
+    setFormData(null);
   };
 
-  console.log("filter:", filteredQuestions);
   return (
     <section className="px-16 py-6">
       <div className="flex gap-6">
         <div className="mb-4 w-72">
-          <label
+        <label
             htmlFor="subject"
             className="block text-sm font-medium text-gray-700"
           >
@@ -95,15 +84,15 @@ const ShowQuestions = ({ subjects, questions: initialQuestions, getData }) => {
             className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
           >
             <option value="All Questions">All Questions</option>
-            {subjects.map((subject, index) => (
-              <option key={index} value={subject}>
-                {subject}
+            {subjects.map(({subject_name}, index) => (
+              <option key={index} value={subject_name}>
+                {subject_name}
               </option>
             ))}
           </select>
         </div>
         <div className="mb-4 w-72">
-          <label
+        <label
             htmlFor="subject"
             className="block text-sm font-medium text-gray-700"
           >
@@ -117,9 +106,9 @@ const ShowQuestions = ({ subjects, questions: initialQuestions, getData }) => {
             className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
           >
             <option value="Choose difficulty">All Difficulty</option>
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
+            <option value="EASY">Easy</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HARD">Hard</option>
           </select>
         </div>
       </div>
@@ -137,183 +126,32 @@ const ShowQuestions = ({ subjects, questions: initialQuestions, getData }) => {
         </thead>
         <tbody>
           {filteredQuestions.map((question, index) => (
-            <tr key={index}>
+            <tr key={question.id}>
               <td>{index + 1}</td>
-              <td>{question.subject}</td>
+              <td>{question.subject_name}</td>
               <td>{question.question}</td>
-              <td>{question.difficulty}</td>
+              <td>{question.question_level}</td>
               <td>
                 <ul className="list-decimal">
-                  {question.options.map((opt) => (
-                    <li key={opt}>{opt}</li>
+                  {question.options.map((opt, i) => (
+                    <li key={i}>{opt}</li>
                   ))}
                 </ul>
               </td>
-              <td>{question.correctAnswer}</td>
-              <td className="flex gap-6 ">
+              <td>{question.correct_answer}</td>
+              <td className="flex gap-6">
                 <button
                   className="btn btn-sm"
-                  onClick={() => {
-                    editQuestion(index);
-                    document.getElementById("my_modal_1").showModal();
-                  }}
+                  onClick={() => editQuestion(question.id)}
                 >
                   Edit
                 </button>
                 <dialog id="my_modal_1" className="modal">
-                  <div className="modal-box">
-                    <h3 className="text-lg font-bold">
-                      Edit the Question below
-                    </h3>
-
-                    <div className="modal-action">
-                      <form
-                        onSubmit={handleFormSubmit}
-                        className="grid w-full grid-cols-2 gap-6 mb-4"
-                        method="dialog"
-                      >
-                        <div className="mb-4">
-                          <label
-                            htmlFor="subject"
-                            className="block text-sm font-medium text-gray-700"
-                          >
-                            Subject
-                          </label>
-                          <select
-                            id="subject"
-                            name="subject"
-                            value={formData?.subject || ""}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                subject: e.target.value,
-                              })
-                            }
-                            className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
-                          >
-                            <option value="Choose subject" disabled>
-                              Choose subject
-                            </option>
-                            {subjects.map((subject, index) => (
-                              <option key={index} value={subject}>
-                                {subject}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className="mb-4">
-                          <label
-                            htmlFor="difficulty"
-                            className="block text-sm font-medium text-gray-700"
-                          >
-                            Difficulty
-                          </label>
-                          <select
-                            id="difficulty"
-                            name="difficulty"
-                            value={formData?.difficulty || ""}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                difficulty: e.target.value,
-                              })
-                            }
-                            className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
-                          >
-                            <option value="Choose difficulty" disabled>
-                              Choose difficulty
-                            </option>
-                            <option value="easy">Easy</option>
-                            <option value="medium">Medium</option>
-                            <option value="hard">Hard</option>
-                          </select>
-                        </div>
-                        <div className="mb-4">
-                          <label
-                            htmlFor="question"
-                            className="block text-sm font-medium text-gray-700"
-                          >
-                            Question
-                          </label>
-                          <input
-                            type="text"
-                            id="question"
-                            name="question"
-                            value={formData?.question || ""}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                question: e.target.value,
-                              })
-                            }
-                            className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                        <div className="mb-4">
-                          <label
-                            htmlFor="correctAnswer"
-                            className="block text-sm font-medium text-gray-700"
-                          >
-                            Correct Answer
-                          </label>
-                          <input
-                            type="text"
-                            id="correctAnswer"
-                            name="correctAnswer"
-                            value={formData?.correctAnswer || ""}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                correctAnswer: e.target.value,
-                              })
-                            }
-                            className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                        {formData?.options.map((option, index) => (
-                          <div key={index} className="mb-4">
-                            <label
-                              htmlFor={`option${index}`}
-                              className="block text-sm font-medium text-gray-700"
-                            >
-                              Option {index + 1}
-                            </label>
-                            <input
-                              type="text"
-                              id={`option${index}`}
-                              name={`option${index}`}
-                              value={option}
-                              onChange={(e) => {
-                                const newOptions = [...formData.options];
-                                newOptions[index] = e.target.value;
-                                setFormData({
-                                  ...formData,
-                                  options: newOptions,
-                                });
-                              }}
-                              className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
-                            />
-                          </div>
-                        ))}
-                        <button type="submit" className="btn btn-success ">
-                          Save
-                        </button>
-                        <button
-                          className="btn btn-neutral "
-                          onClick={() => {
-                            document.getElementById("my_modal_1").close();
-                            setFormData(originalData);
-                          }}
-                        >
-                          Cancle
-                        </button>
-                      </form>
-                    </div>
-                  </div>
+                  {/* Modal content */}
                 </dialog>
                 <button
-                  onClick={() => deleteQuestion(index)}
                   className="btn btn-error btn-sm"
+                  onClick={() => deleteQuestion(question.id)}
                 >
                   Delete
                 </button>

@@ -10,6 +10,7 @@ import PrepareSet from "./components/PrepareSet";
 function App() {
   const [fetchSubjects, setFetchSubjects] = useState([]);
   const [fetchQues, setFetchQues] = useState([]);
+
   const [totalQuestions, setTotalQuestions] = useState([]);
   const [subjects, setSubjects] = useState(
     JSON.parse(localStorage.getItem("subjects")) || []
@@ -30,7 +31,8 @@ function App() {
     setTotalQuestions(data);
   }
   console.log("fetch:", fetchSubjects);
-  // Fetching data from the server
+
+  // Fetching subject data from the server
   const fetchData = async () => {
     try {
       const response = await fetch(
@@ -48,6 +50,8 @@ function App() {
       console.error("Error fetching data:", error);
     }
   };
+
+  // fetching question data from the server
   const fetchQuesData = async () => {
     try {
       const response = await fetch(
@@ -60,17 +64,20 @@ function App() {
         }
       );
       const data = await response.json();
-      setFetchQues(data);
-      console.log('all ques:', data);
-      console.log('all ques:', fetchQues);
+      setFetchQues([ ...data]);
+      console.log('all ques inside fun:', data);
+      
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
   useEffect(() => {
-    fetchQuesData()
-  console.log('all ques:',fetchQues) }
+    fetchQuesData();
+   }
   , []);
+  useEffect(() => {
+    console.log('all ques after fetch:', fetchQues);
+  }, [fetchQues]);
 
   return (
     <Router>
@@ -113,8 +120,10 @@ function App() {
                 <ShowQuestions
                   questions={questions}
                   setQuestions={setQuestions}
-                  subjects={subjects}
+                  // subjects={subjects}
                   getData={getData}
+                  fetchQues={fetchQues}
+                  subjects={fetchSubjects}
                 />
               }
             />
