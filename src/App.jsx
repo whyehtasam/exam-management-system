@@ -118,12 +118,9 @@ function App() {
               path="/showQuestions"
               element={
                 <ShowQuestions
-                  questions={questions}
-                  setQuestions={setQuestions}
-                  // subjects={subjects}
-                  getData={getData}
                   fetchQues={fetchQues}
                   subjects={fetchSubjects}
+                  fetchQuesData={fetchQuesData}
                 />
               }
             />
@@ -131,7 +128,10 @@ function App() {
             <Route
               path="/prepareSets"
               element={
-                <PrepareSet questions={totalQuestions} subjects={subjects} />
+                <PrepareSet
+                 fetchQues={fetchQues}
+                subjects={fetchSubjects}
+                fetchQuesData={fetchQuesData} />
               }
             />
           </Routes>
